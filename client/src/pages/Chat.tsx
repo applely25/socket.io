@@ -99,7 +99,6 @@ const Chat = () => {
     socket.on("room-info-updated", handleRoomInfoUpdated);
     socket.on("receive-message", handleReceiveMessage);
 
-    // 타이핑 상태 수신 리스너 추가
     socket.on(
       "user-typing",
       ({
@@ -122,7 +121,6 @@ const Chat = () => {
         }
       }
     );
-    // 타이핑 중지 상태 수신 리스너 추가
     socket.on(
       "user-stop-typing",
       ({ nickname: stoppedNickname }: { nickname: string }) => {
@@ -153,7 +151,6 @@ const Chat = () => {
     }
   }, [messages, isScrolledToBottom]);
 
-  // 타이핑 상태 주기적으로 정리
   useEffect(() => {
     const interval = setInterval(() => {
       setTypingUsers((prev) =>
@@ -164,7 +161,6 @@ const Chat = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // typingUsers 상태가 변경될 때마다 스크롤 위치를 확인하고 조정
   useEffect(() => {
     if (!messageContainerRef.current) return;
 
@@ -180,13 +176,11 @@ const Chat = () => {
     socket.emit("send-message", roomId, message);
     setMessage("");
 
-    // 메시지를 보낼 때는 항상 스크롤을 아래로 내림
     setIsScrolledToBottom(true);
     if (messageContainerRef.current) {
       messageContainerRef.current.scrollTop =
         messageContainerRef.current.scrollHeight;
     }
-    // 미리보기가 있다면 제거
     setNewMessagePreview(null);
   };
 
@@ -217,19 +211,16 @@ const Chat = () => {
       setNewMessagePreview(null);
     }
   };
-
-  // Input onChange 핸들러 수정
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
-
-    // 타이핑 상태 emit
+  
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
     socket.emit("typing", { roomId, nickname });
 
-    // 3초 후 타이핑 중지 상태 전송
     typingTimeoutRef.current = setTimeout(() => {
       socket.emit("stop-typing", { roomId, nickname });
     }, 3000);
